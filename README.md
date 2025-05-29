@@ -25,6 +25,9 @@ A Django-based content management system with user management, blog, shop, and s
   - Payment integration
   - Shipping management
   - Customer management
+  - Virtual product support with course content
+  - Chapter and lesson management
+  - User progress tracking
   - RESTful API endpoints
 
 - Site Settings
@@ -42,6 +45,7 @@ A Django-based content management system with user management, blog, shop, and s
 - Pillow (for image processing)
 - django-taggit (for tag management)
 - django-ckeditor (for rich text editing)
+- drf-nested-routers (for nested API endpoints)
 - Other dependencies listed in requirements.txt
 
 ## Installation
@@ -127,6 +131,23 @@ python manage.py runserver
 - `PUT /api/shop/attributes/{id}/` - Update attribute
 - `DELETE /api/shop/attributes/{id}/` - Delete attribute
 
+### Course Content (Virtual Products)
+- `GET /api/shop/products/{id}/chapters/` - List chapters
+- `POST /api/shop/products/{id}/chapters/` - Create chapter
+- `GET /api/shop/products/{id}/chapters/{chapter_id}/` - Retrieve chapter
+- `PUT /api/shop/products/{id}/chapters/{chapter_id}/` - Update chapter
+- `DELETE /api/shop/products/{id}/chapters/{chapter_id}/` - Delete chapter
+- `GET /api/shop/products/{id}/chapters/{chapter_id}/lessons/` - List lessons
+- `POST /api/shop/products/{id}/chapters/{chapter_id}/lessons/` - Create lesson
+- `GET /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Retrieve lesson
+- `PUT /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Update lesson
+- `DELETE /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Delete lesson
+- `GET /api/shop/progress/` - List user progress
+- `POST /api/shop/progress/` - Create progress record
+- `GET /api/shop/progress/{id}/` - Retrieve progress
+- `PUT /api/shop/progress/{id}/` - Update progress
+- `DELETE /api/shop/progress/{id}/` - Delete progress
+
 ### Settings
 - `GET /api/settings/settings/` - Get site settings
 - `PUT /api/settings/settings/{id}/` - Update site settings
@@ -154,6 +175,9 @@ The project includes a comprehensive admin interface for managing all aspects of
   - Order management
   - Payment settings
   - Shipping settings
+  - Virtual product management
+  - Chapter and lesson management
+  - User progress tracking
 
 - Site Settings
   - Basic information
