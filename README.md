@@ -1,6 +1,6 @@
 # PyPress Core
 
-A Django-based content management system with user management, blog, and site settings.
+A Django-based content management system with user management, blog, shop, and site settings.
 
 ## Features
 
@@ -15,6 +15,16 @@ A Django-based content management system with user management, blog, and site se
   - Category and tag support
   - SEO-friendly URLs and meta tags
   - Custom meta fields support
+  - Comment system with moderation
+  - RESTful API endpoints
+
+- Shop System
+  - Product management with variants
+  - Category and attribute support
+  - Order management
+  - Payment integration
+  - Shipping management
+  - Customer management
   - RESTful API endpoints
 
 - Site Settings
@@ -29,6 +39,9 @@ A Django-based content management system with user management, blog, and site se
 - Python 3.8+
 - Django 5.0+
 - Redis (for caching)
+- Pillow (for image processing)
+- django-taggit (for tag management)
+- django-ckeditor (for rich text editing)
 - Other dependencies listed in requirements.txt
 
 ## Installation
@@ -86,10 +99,67 @@ python manage.py runserver
 - `GET /api/blog/categories/{id}/` - Retrieve category
 - `PUT /api/blog/categories/{id}/` - Update category
 - `DELETE /api/blog/categories/{id}/` - Delete category
+- `GET /api/blog/comments/` - List comments
+- `POST /api/blog/comments/` - Create comment
+- `GET /api/blog/comments/{id}/` - Retrieve comment
+- `PUT /api/blog/comments/{id}/` - Update comment
+- `DELETE /api/blog/comments/{id}/` - Delete comment
+
+### Shop
+- `GET /api/shop/products/` - List products
+- `POST /api/shop/products/` - Create product
+- `GET /api/shop/products/{id}/` - Retrieve product
+- `PUT /api/shop/products/{id}/` - Update product
+- `DELETE /api/shop/products/{id}/` - Delete product
+- `GET /api/shop/categories/` - List categories
+- `POST /api/shop/categories/` - Create category
+- `GET /api/shop/categories/{id}/` - Retrieve category
+- `PUT /api/shop/categories/{id}/` - Update category
+- `DELETE /api/shop/categories/{id}/` - Delete category
+- `GET /api/shop/orders/` - List orders
+- `POST /api/shop/orders/` - Create order
+- `GET /api/shop/orders/{id}/` - Retrieve order
+- `PUT /api/shop/orders/{id}/` - Update order
+- `DELETE /api/shop/orders/{id}/` - Delete order
+- `GET /api/shop/attributes/` - List attributes
+- `POST /api/shop/attributes/` - Create attribute
+- `GET /api/shop/attributes/{id}/` - Retrieve attribute
+- `PUT /api/shop/attributes/{id}/` - Update attribute
+- `DELETE /api/shop/attributes/{id}/` - Delete attribute
 
 ### Settings
 - `GET /api/settings/settings/` - Get site settings
 - `PUT /api/settings/settings/{id}/` - Update site settings
+
+## Admin Interface
+
+The project includes a comprehensive admin interface for managing all aspects of the system:
+
+- User Management
+  - User creation and editing
+  - Role assignment
+  - Permission management
+
+- Blog Management
+  - Post creation and editing with rich text editor
+  - Category management
+  - Tag management
+  - Comment moderation
+  - SEO settings
+
+- Shop Management
+  - Product management with variants
+  - Category management
+  - Attribute management
+  - Order management
+  - Payment settings
+  - Shipping settings
+
+- Site Settings
+  - Basic information
+  - Contact details
+  - Social media links
+  - SEO configuration
 
 ## Security Features
 
@@ -100,6 +170,8 @@ python manage.py runserver
 - Role-based access control
 - Secure file uploads
 - Input validation
+- API authentication
+- Rate limiting
 
 ## Performance Features
 
@@ -108,6 +180,8 @@ python manage.py runserver
 - Pagination
 - Efficient file handling
 - Lazy loading
+- Image optimization
+- API response caching
 
 ## SEO Features
 
@@ -116,6 +190,28 @@ python manage.py runserver
 - Schema.org markup
 - Open Graph tags
 - Twitter Cards support
+- XML sitemap
+- Robots.txt configuration
+
+## Development
+
+### Code Style
+- Follow PEP 8 guidelines
+- Use meaningful variable and function names
+- Write docstrings for all functions and classes
+- Keep functions small and focused
+
+### Testing
+- Write unit tests for all new features
+- Use pytest for testing
+- Maintain good test coverage
+- Run tests before committing
+
+### Git Workflow
+- Use feature branches
+- Write meaningful commit messages
+- Keep commits focused and atomic
+- Review code before merging
 
 ## License
 
