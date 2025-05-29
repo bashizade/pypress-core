@@ -1,67 +1,31 @@
 from rest_framework import serializers
-from .models import Post, Category, Tag, Comment, PostMeta
+from .models import Post, Category, PostMeta
+from users.serializers import UserSerializer
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'parent', 'created_at', 'updated_at']
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name', 'slug']
+        fields = ('id', 'name', 'slug', 'parent')
 
 class PostMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostMeta
-        fields = ['key', 'value']
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    replies = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Comment
-        fields = ['id', 'author', 'content', 'created_at', 'updated_at', 'is_approved', 'replies']
-        read_only_fields = ['is_approved']
-
-    def get_replies(self, obj):
-        if obj.parent is None:  # Only get replies for parent comments
-            replies = Comment.objects.filter(parent=obj, is_approved=True)
-            return CommentSerializer(replies, many=True).data
-        return []
+        fields = ('key', 'value')
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    categories = CategorySerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    comments = serializers.SerializerMethodField()
-    metadata = PostMetaSerializer(many=True, read_only=True)
-    url = serializers.HyperlinkedIdentityField(view_name='blog:post-detail')
-
+    author = UserSerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        write_only=True,
+        source='category'
+    )
+    meta_fields = PostMetaSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Post
-        fields = [
-            'id', 'uuid', 'title', 'slug', 'author', 'content', 'excerpt',
-            'featured_image', 'categories', 'tags', 'status', 'created_at',
-            'updated_at', 'published_at', 'views_count', 'comment_count',
-            'is_featured', 'comments', 'metadata', 'url'
-        ]
-        read_only_fields = ['views_count', 'comment_count']
-
-    def get_comments(self, obj):
-        comments = Comment.objects.filter(post=obj, parent=None, is_approved=True)
-        return CommentSerializer(comments, many=True).data
-
-class PostListSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    categories = CategorySerializer(many=True, read_only=True)
-    url = serializers.HyperlinkedIdentityField(view_name='blog:post-detail')
-
-    class Meta:
-        model = Post
-        fields = [
-            'id', 'uuid', 'title', 'slug', 'author', 'excerpt',
-            'featured_image', 'categories', 'status', 'published_at',
-            'views_count', 'comment_count', 'is_featured', 'url'
-        ] 
+        fields = ('id', 'title', 'slug', 'summary', 'content', 'featured_image',
+                 'category', 'category_id', 'tags', 'author', 'created_at',
+                 'updated_at', 'published', 'published_at', 'meta_fields',
+                 '_meta_title', '_meta_description', '_meta_keywords')
+        read_only_fields = ('id', 'created_at', 'updated_at', 'published_at') 
