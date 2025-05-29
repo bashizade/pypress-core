@@ -11,6 +11,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    description = models.TextField(blank=True)
     
     class Meta:
         verbose_name = _('category')
@@ -25,18 +26,19 @@ class Post(ModelMeta, models.Model):
     summary = models.TextField()
     content = RichTextField()
     featured_image = models.ImageField(upload_to='blog/featured_images/')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
     tags = TaggableManager()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
     published_at = models.DateTimeField(null=True, blank=True)
     
-    # Meta fields for SEO
+    # SEO Fields
     _meta_title = models.CharField(max_length=200, blank=True)
     _meta_description = models.TextField(blank=True)
     _meta_keywords = models.CharField(max_length=200, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = _('post')
@@ -47,14 +49,31 @@ class Post(ModelMeta, models.Model):
         return self.title
 
 class PostMeta(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='meta_fields')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='meta')
     key = models.CharField(max_length=100)
     value = models.TextField()
     
     class Meta:
         verbose_name = _('post meta')
-        verbose_name_plural = _('post metas')
+        verbose_name_plural = _('post meta')
         unique_together = ('post', 'key')
         
     def __str__(self):
-        return f"{self.post.title} - {self.key}" 
+        return f"{self.post.title} - {self.key}"
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    content = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('comment')
+        verbose_name_plural = _('comments')
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.post.title}" 
