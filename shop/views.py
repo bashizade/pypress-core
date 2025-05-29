@@ -1,11 +1,13 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions, filters
+from django.shortcuts import render, get_object_or_404
+from rest_framework import viewsets, permissions, filters, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from .models import (
     Category, Product, ProductImage, ProductVariant,
     ProductAttribute, ProductAttributeValue, ShippingMethod,
     ShippingZone, Order, OrderItem, Payment, Cart, CartItem,
-    Review
+    Review, Chapter, Lesson, UserProgress
 )
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductImageSerializer,
@@ -13,7 +15,8 @@ from .serializers import (
     ProductAttributeValueSerializer, ShippingMethodSerializer,
     ShippingZoneSerializer, OrderSerializer, OrderItemSerializer,
     PaymentSerializer, CartSerializer, CartItemSerializer,
-    ReviewSerializer
+    ReviewSerializer, ChapterSerializer, LessonSerializer,
+    UserProgressSerializer
 )
 
 # Create your views here.
@@ -121,3 +124,52 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class ChapterViewSet(viewsets.ModelViewSet):
+    serializer_class = ChapterSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        product_id = self.kwargs.get('product_pk')
+        return Chapter.objects.filter(product_id=product_id)
+    
+    def perform_create(self, serializer):
+        product_id = self.kwargs.get('product_pk')
+        product = get_object_or_404(Product, id=product_id)
+        serializer.save(product=product)
+
+class LessonViewSet(viewsets.ModelViewSet):
+    serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        chapter_id = self.kwargs.get('chapter_pk')
+        return Lesson.objects.filter(chapter_id=chapter_id)
+    
+    def perform_create(self, serializer):
+        chapter_id = self.kwargs.get('chapter_pk')
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        serializer.save(chapter=chapter)
+
+class UserProgressViewSet(viewsets.ModelViewSet):
+    serializer_class = UserProgressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return UserProgress.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def update_progress(self, request, pk=None):
+        progress = self.get_object()
+        progress_percentage = request.data.get('progress_percentage', 0)
+        last_position = request.data.get('last_position')
+        
+        progress.progress_percentage = progress_percentage
+        if last_position:
+            progress.last_position = last_position
+        progress.save()
+        
+        return Response(self.get_serializer(progress).data)
