@@ -35,32 +35,48 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         model = ProductVariant
         fields = ['id', 'attributes', 'sku', 'price', 'sale_price', 'stock']
 
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = [
+            'id', 'title', 'description', 'content_type',
+            'content', 'media_file', 'duration', 'order',
+            'is_free', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+class ChapterSerializer(serializers.ModelSerializer):
+    lessons = LessonSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Chapter
+        fields = [
+            'id', 'title', 'description', 'order',
+            'lessons', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
-        write_only=True,
-        source='category'
+        source='category',
+        write_only=True
     )
-    images = ProductImageSerializer(many=True, read_only=True)
-    variants = ProductVariantSerializer(many=True, read_only=True)
     attributes = ProductAttributeValueSerializer(many=True, read_only=True)
-    chapters = serializers.SerializerMethodField()
+    images = ProductImageSerializer(many=True, read_only=True)
+    chapters = ChapterSerializer(many=True, read_only=True)
     
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'slug', 'summary', 'description',
-            'featured_image', 'category', 'category_id',
-            'tags', 'price', 'sale_price', 'stock',
-            'product_type', 'attributes', 'images', 'variants',
-            'created_at', 'updated_at', 'chapters'
+            'id', 'name', 'slug', 'description', 'price',
+            'product_type', 'category', 'category_id',
+            'attributes', 'images', 'chapters', 'tags',
+            'is_active', 'created_at', 'updated_at',
+            '_meta_title', '_meta_description', '_meta_keywords'
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
-
-    def get_chapters(self, obj):
-        chapters = obj.chapters.all()
-        return ChapterSerializer(chapters, many=True).data
 
 class ShippingMethodSerializer(serializers.ModelSerializer):
     class Meta:
@@ -168,27 +184,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             'content', 'is_approved', 'created_at'
         ]
         read_only_fields = ['user', 'is_approved', 'created_at']
-
-class LessonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Lesson
-        fields = [
-            'id', 'title', 'description', 'content_type',
-            'content', 'media_file', 'duration', 'order',
-            'is_free', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at']
-
-class ChapterSerializer(serializers.ModelSerializer):
-    lessons = LessonSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = Chapter
-        fields = [
-            'id', 'title', 'description', 'order',
-            'lessons', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at']
 
 class UserProgressSerializer(serializers.ModelSerializer):
     class Meta:
