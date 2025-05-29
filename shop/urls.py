@@ -17,8 +17,6 @@ products_router.register(r'chapters', views.ChapterViewSet, basename='product-ch
 chapters_router = routers.NestedDefaultRouter(products_router, r'chapters', lookup='chapter')
 chapters_router.register(r'lessons', views.LessonViewSet, basename='chapter-lessons')
 
-urlpatterns = [
-    path('', include(router.urls)),
-    path('', include(products_router.urls)),
-    path('', include(chapters_router.urls)),
-] 
+shop_router = router.urls
+products_router = products_router.urls
+chapters_router = chapters_router.urls

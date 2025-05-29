@@ -5,6 +5,4 @@ from . import views
 router = DefaultRouter()
 router.register(r'settings', views.SiteSettingsViewSet, basename='settings')
 
-urlpatterns = [
-    path('', include(router.urls)),
-] 
+settings_router = router.urls

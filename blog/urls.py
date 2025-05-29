@@ -7,6 +7,4 @@ router.register(r'categories', views.CategoryViewSet)
 router.register(r'posts', views.PostViewSet)
 router.register(r'comments', views.CommentViewSet, basename='comment')
 
-urlpatterns = [
-    path('', include(router.urls)),
-] 
+blog_router = router.urls

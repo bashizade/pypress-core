@@ -6,6 +6,4 @@ router = DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'roles', views.RoleViewSet)
 
-urlpatterns = [
-    path('', include(router.urls)),
-] 
+users_router = router.urls
