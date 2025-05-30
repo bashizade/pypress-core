@@ -25,4 +25,31 @@ class UserViewSet(viewsets.ModelViewSet):
 class RoleViewSet(viewsets.ModelViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
-    permission_classes = [permissions.IsAdminUser] 
+    permission_classes = [permissions.IsAdminUser]
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return User.objects.filter(id=self.request.user.id)
+    
+    def get_object(self):
+        return self.request.user
+    
+    def get_permissions(self):
+        if self.action in ['retrieve', 'update', 'partial_update']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
+    
+    @action(detail=False, methods=['get', 'put', 'patch'])
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(user, data=request.data, partial=request.method == 'PATCH')
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data) 

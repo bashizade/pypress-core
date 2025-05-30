@@ -4,7 +4,7 @@ from .models import (
     Category, Product, ProductAttribute, ProductAttributeValue,
     ProductImage, ProductVariant, ShippingMethod, ShippingZone,
     Order, OrderItem, Payment, Cart, CartItem, Review,
-    Chapter, Lesson, UserProgress
+    Chapter, Lesson, UserProgress, DiscountCode, DiscountUsage
 )
 
 @admin.register(Category)
@@ -141,3 +141,39 @@ class UserProgressAdmin(admin.ModelAdmin):
     list_filter = ['is_completed', 'lesson__chapter__product']
     search_fields = ['user__username', 'lesson__title']
     readonly_fields = ['last_accessed', 'created_at']
+
+@admin.register(DiscountCode)
+class DiscountCodeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'discount_type', 'discount_value', 'expiry_date', 'is_active', 'times_used')
+    list_filter = ('discount_type', 'is_active', 'free_shipping', 'exclude_sale_items', 'individual_use_only')
+    search_fields = ('code', 'description')
+    readonly_fields = ('times_used', 'created_at', 'updated_at')
+    filter_horizontal = ('products', 'excluded_products', 'categories', 'excluded_categories')
+    fieldsets = (
+        ('اطلاعات اصلی', {
+            'fields': ('code', 'description', 'discount_type', 'discount_value', 'free_shipping', 'expiry_date', 'is_active')
+        }),
+        ('محدودیت‌های استفاده', {
+            'fields': ('usage_limit', 'usage_limit_per_user', 'times_used')
+        }),
+        ('محدودیت‌های مبلغ', {
+            'fields': ('min_amount', 'max_amount', 'exclude_sale_items', 'individual_use_only')
+        }),
+        ('محدودیت‌های محصول', {
+            'fields': ('products', 'excluded_products', 'categories', 'excluded_categories')
+        }),
+        ('محدودیت‌های کاربر', {
+            'fields': ('allowed_emails',)
+        }),
+        ('اطلاعات سیستمی', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(DiscountUsage)
+class DiscountUsageAdmin(admin.ModelAdmin):
+    list_display = ('discount_code', 'user', 'order', 'used_at')
+    list_filter = ('used_at',)
+    search_fields = ('discount_code__code', 'user__email', 'order__id')
+    readonly_fields = ('used_at',)

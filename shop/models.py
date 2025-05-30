@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from taggit.managers import TaggableManager
 from meta.models import ModelMeta
 from ckeditor.fields import RichTextField
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -316,3 +317,73 @@ class UserProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.lesson.title}"
+
+class DiscountCode(models.Model):
+    DISCOUNT_TYPES = (
+        ('percentage', 'percentage'),
+        ('fixed_cart', 'fixed_cart'),
+        ('fixed_product', 'fixed_product'),
+    )
+
+    code = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPES)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    free_shipping = models.BooleanField(default=False)
+    expiry_date = models.DateTimeField()
+    
+    # Usage limits
+    usage_limit = models.PositiveIntegerField(default=0)
+    usage_limit_per_user = models.PositiveIntegerField(default=0)
+    times_used = models.PositiveIntegerField(default=0)
+    
+    # Restrictions
+    min_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    max_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    exclude_sale_items = models.BooleanField(default=False)
+    individual_use_only = models.BooleanField(default=False)
+    
+    # Related objects
+    products = models.ManyToManyField('Product', blank=True, related_name='discount_codes')
+    excluded_products = models.ManyToManyField('Product', blank=True, related_name='excluded_discount_codes')
+    categories = models.ManyToManyField('Category', blank=True, related_name='discount_codes')
+    excluded_categories = models.ManyToManyField('Category', blank=True, related_name='excluded_discount_codes')
+    allowed_emails = models.TextField(blank=True, help_text='Allowed emails (one email per line)')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'discount code'
+        verbose_name_plural = 'discount codes'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.code
+
+    def is_valid(self):
+        if not self.is_active:
+            return False
+        if self.expiry_date < timezone.now():
+            return False
+        if self.usage_limit > 0 and self.times_used >= self.usage_limit:
+            return False
+        return True
+
+    def get_allowed_emails_list(self):
+        return [email.strip() for email in self.allowed_emails.split('\n') if email.strip()]
+
+class DiscountUsage(models.Model):
+    discount_code = models.ForeignKey(DiscountCode, on_delete=models.CASCADE, related_name='usages')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='discount_usages')
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='discount_usages')
+    used_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'discount usage'
+        verbose_name_plural = 'discount usages'
+        unique_together = ['discount_code', 'order']
+
+    def __str__(self):
+        return f"{self.discount_code.code} - {self.user.email} - {self.used_at}"

@@ -5,30 +5,34 @@ A Django-based content management system with user management, blog, shop, and s
 ## Features
 
 - User Management
-  - Custom user model with additional fields
+  - Custom user model with additional fields (mobile, national code, birth date, etc.)
   - Role-based access control
   - User authentication and authorization
   - RESTful API endpoints
+  - User profile management
 
 - Blog System
-  - Post management with rich text editor
+  - Post management with rich text editor (CKEditor)
   - Category and tag support
   - SEO-friendly URLs and meta tags
   - Custom meta fields support
   - Comment system with moderation
   - RESTful API endpoints
+  - Nested routing for comments
 
 - Shop System
   - Product management with variants
   - Category and attribute support
   - Order management
   - Payment integration
-  - Shipping management
+  - Shipping management with zones
   - Customer management
   - Virtual product support with course content
   - Chapter and lesson management
   - User progress tracking
+  - Discount code system
   - RESTful API endpoints
+  - Nested routing for product resources
 
 - Site Settings
   - Basic site information
@@ -37,15 +41,32 @@ A Django-based content management system with user management, blog, shop, and s
   - SEO settings
   - RESTful API endpoints
 
+## Project Structure
+
+```
+pypress-core/
+├── api/                 # API configuration
+├── blog/               # Blog application
+├── core/               # Core project settings
+├── settings/           # Site settings application
+├── shop/               # Shop application
+├── users/              # User management application
+├── manage.py           # Django management script
+├── requirements.txt    # Project dependencies
+└── README.md          # Project documentation
+```
+
 ## Requirements
 
 - Python 3.8+
 - Django 5.0+
-- Redis (for caching)
-- Pillow (for image processing)
-- django-taggit (for tag management)
-- django-ckeditor (for rich text editing)
-- drf-nested-routers (for nested API endpoints)
+- Django REST Framework 3.15+
+- Pillow 10.0+ (for image processing)
+- django-taggit 5.0+ (for tag management)
+- django-ckeditor 6.7+ (for rich text editing)
+- drf-nested-routers 0.94+ (for nested API endpoints)
+- django-allauth 0.61+ (for authentication)
+- django-redis 5.4+ (for caching)
 - Other dependencies listed in requirements.txt
 
 ## Installation
@@ -84,73 +105,59 @@ python manage.py runserver
 
 ## API Endpoints
 
-### Users
-- `GET /api/users/` - List users
-- `POST /api/users/` - Create user
-- `GET /api/users/{id}/` - Retrieve user
-- `PUT /api/users/{id}/` - Update user
-- `DELETE /api/users/{id}/` - Delete user
-- `GET /api/users/me/` - Get current user
+### Users API (`/api/users/`)
+- `GET /` - List users
+- `POST /` - Create user
+- `GET /{id}/` - Retrieve user
+- `PUT /{id}/` - Update user
+- `DELETE /{id}/` - Delete user
+- `GET /profile/` - Get/Update user profile
 
-### Blog
-- `GET /api/blog/posts/` - List posts
-- `POST /api/blog/posts/` - Create post
-- `GET /api/blog/posts/{id}/` - Retrieve post
-- `PUT /api/blog/posts/{id}/` - Update post
-- `DELETE /api/blog/posts/{id}/` - Delete post
-- `GET /api/blog/categories/` - List categories
-- `POST /api/blog/categories/` - Create category
-- `GET /api/blog/categories/{id}/` - Retrieve category
-- `PUT /api/blog/categories/{id}/` - Update category
-- `DELETE /api/blog/categories/{id}/` - Delete category
-- `GET /api/blog/comments/` - List comments
-- `POST /api/blog/comments/` - Create comment
-- `GET /api/blog/comments/{id}/` - Retrieve comment
-- `PUT /api/blog/comments/{id}/` - Update comment
-- `DELETE /api/blog/comments/{id}/` - Delete comment
+### Blog API (`/api/blog/`)
+- `GET /categories/` - List categories
+- `POST /categories/` - Create category
+- `GET /categories/{id}/` - Retrieve category
+- `PUT /categories/{id}/` - Update category
+- `DELETE /categories/{id}/` - Delete category
+- `GET /posts/` - List posts
+- `POST /posts/` - Create post
+- `GET /posts/{id}/` - Retrieve post
+- `PUT /posts/{id}/` - Update post
+- `DELETE /posts/{id}/` - Delete post
+- `GET /posts/{post_id}/comments/` - List comments
+- `POST /posts/{post_id}/comments/` - Create comment
+- `GET /posts/{post_id}/comments/{id}/` - Retrieve comment
+- `PUT /posts/{post_id}/comments/{id}/` - Update comment
+- `DELETE /posts/{post_id}/comments/{id}/` - Delete comment
 
-### Shop
-- `GET /api/shop/products/` - List products
-- `POST /api/shop/products/` - Create product
-- `GET /api/shop/products/{id}/` - Retrieve product
-- `PUT /api/shop/products/{id}/` - Update product
-- `DELETE /api/shop/products/{id}/` - Delete product
-- `GET /api/shop/categories/` - List categories
-- `POST /api/shop/categories/` - Create category
-- `GET /api/shop/categories/{id}/` - Retrieve category
-- `PUT /api/shop/categories/{id}/` - Update category
-- `DELETE /api/shop/categories/{id}/` - Delete category
-- `GET /api/shop/orders/` - List orders
-- `POST /api/shop/orders/` - Create order
-- `GET /api/shop/orders/{id}/` - Retrieve order
-- `PUT /api/shop/orders/{id}/` - Update order
-- `DELETE /api/shop/orders/{id}/` - Delete order
-- `GET /api/shop/attributes/` - List attributes
-- `POST /api/shop/attributes/` - Create attribute
-- `GET /api/shop/attributes/{id}/` - Retrieve attribute
-- `PUT /api/shop/attributes/{id}/` - Update attribute
-- `DELETE /api/shop/attributes/{id}/` - Delete attribute
+### Shop API (`/api/shop/`)
+- `GET /categories/` - List categories
+- `POST /categories/` - Create category
+- `GET /categories/{id}/` - Retrieve category
+- `PUT /categories/{id}/` - Update category
+- `DELETE /categories/{id}/` - Delete category
+- `GET /products/` - List products
+- `POST /products/` - Create product
+- `GET /products/{id}/` - Retrieve product
+- `PUT /products/{id}/` - Update product
+- `DELETE /products/{id}/` - Delete product
+- `GET /products/{product_id}/variants/` - List variants
+- `POST /products/{product_id}/variants/` - Create variant
+- `GET /products/{product_id}/chapters/` - List chapters
+- `POST /products/{product_id}/chapters/` - Create chapter
+- `GET /products/{product_id}/chapters/{chapter_id}/lessons/` - List lessons
+- `POST /products/{product_id}/chapters/{chapter_id}/lessons/` - Create lesson
+- `GET /products/{product_id}/reviews/` - List reviews
+- `POST /products/{product_id}/reviews/` - Create review
+- `GET /users/{user_id}/orders/` - List user orders
+- `POST /users/{user_id}/orders/` - Create order
+- `GET /users/{user_id}/cart/` - Get user cart
+- `POST /users/{user_id}/cart/items/` - Add item to cart
+- `POST /validate-discount-code/` - Validate discount code
 
-### Course Content (Virtual Products)
-- `GET /api/shop/products/{id}/chapters/` - List chapters
-- `POST /api/shop/products/{id}/chapters/` - Create chapter
-- `GET /api/shop/products/{id}/chapters/{chapter_id}/` - Retrieve chapter
-- `PUT /api/shop/products/{id}/chapters/{chapter_id}/` - Update chapter
-- `DELETE /api/shop/products/{id}/chapters/{chapter_id}/` - Delete chapter
-- `GET /api/shop/products/{id}/chapters/{chapter_id}/lessons/` - List lessons
-- `POST /api/shop/products/{id}/chapters/{chapter_id}/lessons/` - Create lesson
-- `GET /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Retrieve lesson
-- `PUT /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Update lesson
-- `DELETE /api/shop/products/{id}/chapters/{chapter_id}/lessons/{lesson_id}/` - Delete lesson
-- `GET /api/shop/progress/` - List user progress
-- `POST /api/shop/progress/` - Create progress record
-- `GET /api/shop/progress/{id}/` - Retrieve progress
-- `PUT /api/shop/progress/{id}/` - Update progress
-- `DELETE /api/shop/progress/{id}/` - Delete progress
-
-### Settings
-- `GET /api/settings/settings/` - Get site settings
-- `PUT /api/settings/settings/{id}/` - Update site settings
+### Settings API (`/api/settings/`)
+- `GET /settings/` - Get site settings
+- `PUT /settings/{id}/` - Update site settings
 
 ## Admin Interface
 
@@ -160,9 +167,10 @@ The project includes a comprehensive admin interface for managing all aspects of
   - User creation and editing
   - Role assignment
   - Permission management
+  - Profile management
 
 - Blog Management
-  - Post creation and editing with rich text editor
+  - Post creation and editing with CKEditor
   - Category management
   - Tag management
   - Comment moderation
@@ -174,7 +182,8 @@ The project includes a comprehensive admin interface for managing all aspects of
   - Attribute management
   - Order management
   - Payment settings
-  - Shipping settings
+  - Shipping settings with zones
+  - Discount code management
   - Virtual product management
   - Chapter and lesson management
   - User progress tracking
@@ -196,6 +205,8 @@ The project includes a comprehensive admin interface for managing all aspects of
 - Input validation
 - API authentication
 - Rate limiting
+- Secure password reset
+- Session management
 
 ## Performance Features
 
@@ -206,6 +217,7 @@ The project includes a comprehensive admin interface for managing all aspects of
 - Lazy loading
 - Image optimization
 - API response caching
+- Nested resource optimization
 
 ## SEO Features
 
@@ -216,6 +228,7 @@ The project includes a comprehensive admin interface for managing all aspects of
 - Twitter Cards support
 - XML sitemap
 - Robots.txt configuration
+- Custom meta fields
 
 ## Development
 
@@ -224,18 +237,21 @@ The project includes a comprehensive admin interface for managing all aspects of
 - Use meaningful variable and function names
 - Write docstrings for all functions and classes
 - Keep functions small and focused
+- Use type hints where appropriate
 
 ### Testing
 - Write unit tests for all new features
 - Use pytest for testing
 - Maintain good test coverage
 - Run tests before committing
+- Include integration tests
 
 ### Git Workflow
 - Use feature branches
 - Write meaningful commit messages
 - Keep commits focused and atomic
 - Review code before merging
+- Follow semantic versioning
 
 ## License
 

@@ -3,7 +3,7 @@ from .models import (
     Category, Product, ProductImage, ProductVariant,
     ProductAttribute, ProductAttributeValue, ShippingMethod,
     ShippingZone, Order, OrderItem, Payment, Cart, CartItem,
-    Review, Chapter, Lesson, UserProgress
+    Review, Chapter, Lesson, UserProgress, DiscountCode, DiscountUsage
 )
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -192,4 +192,22 @@ class UserProgressSerializer(serializers.ModelSerializer):
             'id', 'lesson', 'is_completed', 'progress_percentage',
             'last_position', 'last_accessed', 'created_at'
         ]
-        read_only_fields = ['user', 'last_accessed', 'created_at'] 
+        read_only_fields = ['user', 'last_accessed', 'created_at']
+
+class DiscountCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountCode
+        fields = [
+            'id', 'code', 'description', 'discount_type', 'discount_value',
+            'free_shipping', 'expiry_date', 'is_active', 'min_amount',
+            'max_amount', 'exclude_sale_items', 'individual_use_only',
+            'products', 'excluded_products', 'categories', 'excluded_categories',
+            'allowed_emails'
+        ]
+        read_only_fields = ['id']
+
+class DiscountUsageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountUsage
+        fields = ['id', 'discount_code', 'user', 'order', 'used_at']
+        read_only_fields = ['id', 'used_at'] 

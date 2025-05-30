@@ -4,7 +4,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Admin interface
     path('admin/', admin.site.urls),
+    
+    # API endpoints
     path('api/', include('api.urls')),
+    
+    # Authentication endpoints
     path('accounts/', include('allauth.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
