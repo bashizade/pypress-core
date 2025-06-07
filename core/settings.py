@@ -14,6 +14,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -189,3 +190,13 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory' 
+
+# Unfold settings
+UNFOLD = {
+    'SITE_HEADER': 'PyPress',
+    'SITE_TITLE': 'PyPress',
+    'SITE_DESCRIPTION': 'A Django-based content management system with user management, blog, shop, and site settings',
+    'SITE_KEYWORDS': 'PyPress',
+    'SITE_AUTHOR': 'AmirHossein Bashizade',
+}
+

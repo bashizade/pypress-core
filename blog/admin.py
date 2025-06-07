@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from .models import Post, Category, PostMeta, Comment
 
 class PostMetaInline(admin.TabularInline):
@@ -6,7 +7,7 @@ class PostMetaInline(admin.TabularInline):
     extra = 1
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(ModelAdmin):
     list_display = ['title', 'author', 'category', 'is_published', 'published_at', 'created_at']
     list_filter = ['is_published', 'category', 'author', 'created_at']
     search_fields = ['title', 'content', 'summary']
@@ -36,20 +37,20 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ModelAdmin):
     list_display = ['name', 'parent', 'description']
     list_filter = ['parent']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
 
 @admin.register(PostMeta)
-class PostMetaAdmin(admin.ModelAdmin):
+class PostMetaAdmin(ModelAdmin):
     list_display = ['post', 'key', 'value']
     list_filter = ['post']
     search_fields = ['post__title', 'key', 'value']
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(ModelAdmin):
     list_display = ['post', 'user', 'content', 'is_approved', 'created_at']
     list_filter = ['is_approved', 'created_at']
     search_fields = ['post__title', 'user__username', 'content']
