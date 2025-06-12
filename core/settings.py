@@ -101,11 +101,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'fa-ir'
+LANGUAGE_CODE = 'fa'
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+LANGUAGES = (
+    ("fa", "Persian"),
+    ("en", "English"),
+)
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -198,5 +202,6 @@ UNFOLD = {
     'SITE_DESCRIPTION': 'A Django-based content management system with user management, blog, shop, and site settings',
     'SITE_KEYWORDS': 'PyPress',
     'SITE_AUTHOR': 'AmirHossein Bashizade',
+    "SHOW_LANGUAGES": True,
 }
 
